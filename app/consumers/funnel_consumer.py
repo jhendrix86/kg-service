@@ -114,10 +114,11 @@ class FunnelConsumer(BaseConsumer):
         }
         
         await self.neo4j.update_node(NodeType.FUNNEL, funnel_id, properties, trace_id)
-        
+
         # Create event node
+        envelope_event_id = f"event_{funnel_id}_launched"
         event_properties = {
-            "event_id": envelope_event_id := f"event_{funnel_id}_launched",
+            "event_id": envelope_event_id,
             "event_type": "funnel.launched",
             "timestamp": datetime.utcnow().isoformat(),
             "source": payload.get("launched_by"),

@@ -7,6 +7,8 @@ from .api_schemas import (
     CausalChainQueryRequest,
     TemporalSequenceRequest,
     SimulationQueryRequest,
+    GraphResponse,
+    InsightResponse,
 )
 
 __all__ = [
@@ -18,4 +20,6 @@ __all__ = [
     "CausalChainQueryRequest",
     "TemporalSequenceRequest",
     "SimulationQueryRequest",
+    "GraphResponse",
+    "InsightResponse",
 ]
