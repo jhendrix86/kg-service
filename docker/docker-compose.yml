@@ -27,6 +27,12 @@ services:
       - kg-network
       - os42-shared
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8034/health', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
   neo4j:
     image: neo4j:5.14.0
