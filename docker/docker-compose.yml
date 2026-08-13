@@ -17,12 +17,15 @@ services:
       - RABBITMQ_URL=amqp://rabbitmq:5672
       - OTEL_ENABLED=true
       - OTEL_ENDPOINT=http://jaeger:4318
-    depends_on:
-      - neo4j
-      - qdrant
-      - rabbitmq
+    # rabbitmq/jaeger moved to shared infra (deploy/docker-compose.infra.yml,
+    # a different compose project - bring up first: deploy/03-build-and-up.sh
+    # infra-up). neo4j/qdrant stay local to this repo - this is the only
+    # engine that uses either, so there's nothing duplicated to consolidate
+    # there, unlike postgres/redis/rabbitmq/jaeger which every engine
+    # duplicated identically.
     networks:
       - kg-network
+      - os42-shared
     restart: unless-stopped
 
   neo4j:
@@ -53,39 +56,13 @@ services:
       - kg-network
     restart: unless-stopped
 
-  rabbitmq:
-    image: rabbitmq:3.12-management
-    container_name: kg-rabbitmq
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    environment:
-      - RABBITMQ_DEFAULT_USER=guest
-      - RABBITMQ_DEFAULT_PASS=guest
-    volumes:
-      - rabbitmq-data:/var/lib/rabbitmq
-    networks:
-      - kg-network
-    restart: unless-stopped
-
-  jaeger:
-    image: jaegertracing/all-in-one:1.50
-    container_name: kg-jaeger
-    ports:
-      - "16686:16686"
-      - "4318:4318"
-    environment:
-      - COLLECTOR_OTLP_ENABLED=true
-    networks:
-      - kg-network
-    restart: unless-stopped
-
 networks:
   kg-network:
     driver: bridge
+  os42-shared:
+    external: true
 
 volumes:
   neo4j-data:
   neo4j-logs:
   qdrant-data:
-  rabbitmq-data:
