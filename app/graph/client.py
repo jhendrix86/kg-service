@@ -42,9 +42,15 @@ class Neo4jClient:
     
     async def initialize_schema(self):
         """Initialize graph schema with constraints and indexes."""
+        # Neo4j's driver only accepts one Cypher statement per session.run() -
+        # get_schema_cypher() returns them newline-joined, so split and run
+        # each individually rather than passing the whole block as one query.
         schema_cypher = GraphSchema.get_schema_cypher()
         async with self._driver.session(database=self.database) as session:
-            await session.run(schema_cypher)
+            for statement in schema_cypher.split("\n"):
+                statement = statement.strip()
+                if statement:
+                    await session.run(statement)
         logger.info("neo4j_schema_initialized")
     
     @asynccontextmanager
