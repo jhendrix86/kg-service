@@ -3,8 +3,11 @@ version: '3.8'
 services:
   kg-service:
     build:
-      context: ..
-      dockerfile: docker/Dockerfile
+      # Workspace root, not just this repo - needed to reach the
+      # autonomy-events sibling package the Dockerfile copies in (see its
+      # own comment for why).
+      context: ../..
+      dockerfile: kg-service/docker/Dockerfile
     container_name: kg-service
     ports:
       - "8034:8034"
