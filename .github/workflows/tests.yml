@@ -1,0 +1,47 @@
+name: Tests
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+# This repo editable-installs sibling packages (autonomy-events) via `-e ../<name>`
+# in requirements.txt. CI clones them next to the checkout first. Needs a
+# repo/org secret `CI_FLEET_TOKEN` - a PAT (fine-grained, Contents:read) with
+# access to the sibling repos under jhendrix86/. Without it the sibling
+# clone step fails with a clear message.
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: repo
+
+      - name: Clone sibling packages
+        run: |
+          if [ -z "${{ secrets.CI_FLEET_TOKEN }}" ]; then
+            echo "::error::CI_FLEET_TOKEN secret is not set - cannot clone private sibling repos (autonomy-events)."
+            exit 1
+          fi
+          for s in autonomy-events; do
+            git clone --depth 1 \
+              "https://x-access-token:${{ secrets.CI_FLEET_TOKEN }}@github.com/jhendrix86/$s.git" "$s"
+          done
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: repo/requirements.txt
+
+      - name: Install dependencies
+        working-directory: repo
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio
+
+      - name: Run tests
+        working-directory: repo
+        run: pytest -q
