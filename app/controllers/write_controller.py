@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from typing import Dict, Any
+import json
 import structlog
 from ..schemas import FunnelLaunchedRequest, FunnelMetricsRequest, FunnelInsightsRequest, AnomalyRequest, GraphResponse
 from ..graph import Neo4jClient, NodeType
@@ -66,7 +67,10 @@ async def funnel_launched(
             "event_type": "funnel.launched",
             "timestamp": request.timestamp.isoformat(),
             "source": request.launched_by,
-            "payload": request.dict(),
+            # Neo4j properties must be primitives - a nested dict (and its
+            # raw datetime) can't be stored; JSON-encode it. mode="json"
+            # so the datetime inside serializes.
+            "payload": json.dumps(request.model_dump(mode="json")),
             "correlation_id": trace_id
         }
         
