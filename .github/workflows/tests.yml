@@ -5,8 +5,9 @@ on:
     branches: [main, master]
   pull_request:
 
-# This repo editable-installs sibling packages (autonomy-events) via `-e ../<name>`
-# in requirements.txt. CI clones them next to the checkout first. Needs a
+# This repo editable-installs sibling packages (autonomy-events,
+# empire-operators) via `-e ../<name>` in requirements.txt. CI clones them
+# next to the checkout first. Needs a
 # repo/org secret `CI_FLEET_TOKEN` - a PAT (fine-grained, Contents:read) with
 # access to the sibling repos under jhendrix86/. Without it the sibling
 # clone step fails with a clear message.
@@ -21,10 +22,10 @@ jobs:
       - name: Clone sibling packages
         run: |
           if [ -z "${{ secrets.CI_FLEET_TOKEN }}" ]; then
-            echo "::error::CI_FLEET_TOKEN secret is not set - cannot clone private sibling repos (autonomy-events)."
+            echo "::error::CI_FLEET_TOKEN secret is not set - cannot clone private sibling repos (autonomy-events, empire-operators)."
             exit 1
           fi
-          for s in autonomy-events; do
+          for s in autonomy-events empire-operators; do
             git clone --depth 1 \
               "https://x-access-token:${{ secrets.CI_FLEET_TOKEN }}@github.com/jhendrix86/$s.git" "$s"
           done

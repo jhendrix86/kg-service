@@ -9,6 +9,7 @@ from .embeddings import QdrantClient, EmbeddingGenerator
 from .tracing import Tracer
 from .services import ConsumerService
 from .utils.config import settings
+from empire_operators.middleware import SafetyBoundaryMiddleware
 
 
 # Configure structured logging
@@ -53,6 +54,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Reject request bodies matching known-unsafe patterns (prompt injection,
+# `drop table`, `<script>`) before they reach a controller. empire_os
+# SafetyBoundaryOperator via the empire-operators sibling — Step 8 Phase B
+# rollout, see EMPIRE_OS_INTEGRATION_ANALYSIS.md + SECURITY_REVIEW.md.
+app.add_middleware(SafetyBoundaryMiddleware)
 
 # Include routers
 app.include_router(write_controller.router)

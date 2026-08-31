@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y \
 # relative to the process's cwd at install time, not to requirements.txt's
 # own location (verified empirically, see governance-engine's Dockerfile).
 COPY autonomy-events/ /app/autonomy-events/
+COPY empire-operators/ /app/empire-operators/
 
 WORKDIR /app/kg-service
 COPY kg-service/requirements.txt .
