@@ -40,9 +40,15 @@ app = FastAPI(
 )
 
 # Add CORS middleware
+def _cors_allowed_origins() -> list:
+    # SECURITY_REVIEW.md #1 - no wildcard with credentials. Set
+    # ALLOWED_ORIGINS (comma-separated) when a browser client exists.
+    import os
+    return [o.strip() for o in os.getenv("ALLOWED_ORIGINS", "").split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_cors_allowed_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
