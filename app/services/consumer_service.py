@@ -67,7 +67,14 @@ class ConsumerService:
                 exchange_name=settings.rabbitmq_exchange,
                 exchange_type=settings.rabbitmq_exchange_type,
                 routing_keys=[f"{consumer_type}.*"],
-                config=settings,
+                # kg-service's own app Settings (pydantic-settings) was
+                # passed here, not an autonomy_events.utils.config.Config -
+                # EventConsumer.connect() reads config.dlq_queue_suffix
+                # (and other Config-only fields) unconditionally, so every
+                # consumer crashed on connect with AttributeError before
+                # ever consuming a single message. Omit it and let
+                # EventConsumer default to Config.from_env() - the real
+                # Config class, with its own sensible defaults.
                 tracer=self.tracer
             )
             
